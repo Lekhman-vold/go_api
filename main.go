@@ -26,18 +26,25 @@ func allArticles(w http.ResponseWriter, r *http.Request){
 }
 
 func homePage(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Homepage")
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
+
+	w.Write([]byte("HomePage"))
 }
 
 func handleRequest() {
-	http.HandleFunc("/", homePage)
-	http.HandleFunc("/articles", allArticles)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", homePage)
+	mux.HandleFunc("/articles", allArticles)
+	err := http.ListenAndServe(":8080", mux)
+	log.Fatal(err)
 }
 
 func main()  {
 	const HOST = "127.0.0.1"
 	const PORT = ":8080"
-	fmt.Printf("Server started >>> %v%v", HOST, PORT)
+	log.Printf("Server started >>> %v%v", HOST, PORT)
 	handleRequest()
 }
